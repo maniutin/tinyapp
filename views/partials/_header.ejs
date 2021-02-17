@@ -11,14 +11,14 @@
       </div>
     </div>
     <% if(username){ %>
-      <label for="username">Logged In As: <%=username%></label>
-      <form method="POST" action="/logout">
-      <button type="submit" class="btn btn-outline-danger" style="margin-left: 10px; width: 75px; height: 35px">Logout</button>
+      <label for="username" style="margin-bottom: 0;">Logged In As: <%=username%></label>
+      <form method="POST" action="/logout" class="form-inline">
+      <button type="submit" class="btn btn-outline-danger my-2 my-sm-0" style="margin-left: 10px; width: 75px">Logout</button>
     </form>
       <% } else { %>
-        <form method="POST" action="/login">
-    <input type="text" name="username" placeholder="username" style="height: 35px">
-    <button type="submit" class="btn btn-outline-primary" style="width: 75px;">Login</button>
+        <form method="POST" action="/login" class="form-inline">
+    <input type="text" name="username" placeholder="username" class="form-control mr-sm-2">
+    <button type="submit" class="btn btn-outline-primary my-2 my-sm-0" style="width: 75px">Login</button>
   </form> 
     <% } %>
   </nav>
