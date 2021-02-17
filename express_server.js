@@ -49,22 +49,23 @@ app.post("/register", (req, res) => {
   const randomID = generateRandomString();
   const email = req.body.email
   const password  = req.body.password
-  emailLookup(res, email, users)
+  if (emailLookup(res, email, users) !== 400){
+    res.cookie('user_ID', randomID)
+    res.redirect('/urls/');
+  }
   const userObj = {
     id: randomID, 
     email,
     password
   }
-  users[randomID] = userObj;
-
-// use this if the func above fails
-  res.cookie('user_ID', randomID)
-  res.redirect('/urls/');
-  
+  users[randomID] = userObj;  
 });
-app.post("/login", (req, res) => {
-  res.redirect("/urls");
+app.get("/login", (req, res) => {
+  res.render("login");
 });
+// app.post("/login", (req, res) => {
+//   res.redirect("/urls");
+// });
 app.post("/logout", (req, res) => {
   res.clearCookie("user_ID");
   res.redirect("/urls");
