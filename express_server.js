@@ -35,16 +35,18 @@ const lookupUserByEmail = function(email, userDB) {
 
 //Filters urlDatabase by userID
 const urlsForUser = function(id){
-  // id is req.cookies['user_ID'];
+  // id should be req.cookies['user_ID'];
   for(let urls in urlDatabase){
-    console.log(urlDatabase[urls])
+    if (urlDatabase[urls].userID === id){
+      return urls;
+    }
   }
 }
 const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "randomID"},
   "9sm5xK": { longURL: "http://www.google.com", userID: "randomID"}
 };
-urlsForUser();
+
 const users = {
   "randomID": {
     id: "randomID",
