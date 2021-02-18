@@ -82,7 +82,6 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password  = req.body.password;
-
   if (lookupUserByEmail(email, users) === false){
     res.sendStatus(403)
     } else {
@@ -91,11 +90,10 @@ app.post("/login", (req, res) => {
         res.sendStatus(403) 
       } else {
         res.cookie('user_ID', foundUserObj.id);
-        res.redirect('/urls/');
+        res.redirect("/urls/");
       }
-    }
-  
-  res.redirect("/urls");
+    }  
+  res.redirect("/urls/");
 });
 app.post("/logout", (req, res) => {
   res.clearCookie("user_ID");
@@ -130,17 +128,27 @@ app.get("/urls/new", (req, res) => {
   }
   res.render("urls_new", templateVars);
 });
-app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
-});
+//Edit
 app.post("/urls/:shortURL", (req, res) => {
+  if (urlDatabase[req.params.shortURL].userID === req.cookies['user_ID']){
   urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+  }
   res.redirect("/urls");
 });
+//Delete
+app.post("/urls/:shortURL/delete", (req, res) => {
+  if (urlDatabase[req.params.shortURL].userID === req.cookies['user_ID']){
+  delete urlDatabase[req.params.shortURL];
+  }
+  res.redirect("/urls");
+});
+
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { user: users[req.cookies['user_ID']], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL};
-  res.render("urls_show", templateVars);
+  if (req.cookies['user_ID']){
+    res.render("urls_show", templateVars);
+    } 
+    res.render("urls_index_not_logged_in", templateVars);
 });
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL;
