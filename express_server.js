@@ -18,6 +18,7 @@ const generateRandomString = function() {
   return result;
 };
 
+// return false if the email is NOT found
 const emailLookup = function(email, userDB) {
   if (email === "") {
     return false;
@@ -68,28 +69,22 @@ app.get("/login", (req, res) => {
   res.render("login");
 });
 app.post("/login", (req, res) => {
-  //if statement to lookup email and password
-  //if email not found -> 403
-  //if email found compare the password
-  //if the password doesnt match -> 403
-  //if email and password match -> set user_ID cookie with matching random ID
-  //redirect to URLs
   const email = req.body.email;
   const password  = req.body.password;
-  console.log("LOOKUP LOGIN: ", emailLookup(email, users))
 
   if (emailLookup(email, users) === false){
     res.sendStatus(403)
     } else {
-      for (let user in users) {
-        if (users[user].password !== password) {
-          res.sendStatus(403)
-        } else {
-          res.cookie('user_ID');
-          res.redirect('/urls/');
-        }
+      let foundUserObj = emailLookup(email, users);
+      if (foundUserObj.password !== password){
+        res.sendStatus(403) 
+      } else {
+        res.cookie('user_ID', foundUserObj.id);
+        res.redirect('/urls/');
+      }
     }
-  }
+    console.log("LOOKUP LOGIN: ", emailLookup(email, users))
+  
   res.redirect("/urls");
 });
 app.post("/logout", (req, res) => {
