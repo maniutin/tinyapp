@@ -35,12 +35,13 @@ const lookupUserByEmail = function(email, userDB) {
 
 //Filters urlDatabase by userID
 const urlsForUser = function(id){
-  // id should be req.cookies['user_ID'];
+  let foundShortURL = {};
   for(let urls in urlDatabase){
     if (urlDatabase[urls].userID === id){
-      return urls;
+      foundShortURL[urls] = urlDatabase[urls];
     }
   }
+  return foundShortURL;
 }
 const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "randomID"},
@@ -110,13 +111,16 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 app.get("/urls", (req, res) => {
-  const templateVars = {user: users[req.cookies['user_ID']], urls: urlDatabase};
+  const templateVars = {user: users[req.cookies['user_ID']], urls: urlsForUser(req.cookies['user_ID'])};
+  if (req.cookies['user_ID']){
   res.render("urls_index", templateVars);
+  } 
+  res.render("urls_index_not_logged_in", templateVars);
+  
 });
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.cookies['user_ID']};
-  console.log(urlDatabase)
   res.redirect(`/urls/${shortURL}`);
 });
 app.get("/urls/new", (req, res) => {
