@@ -34,4 +34,4 @@ const urlsForUser = function(id, urlDB) {
   return foundShortURL;
 };
 
-module.exports = {generateRandomString, lookupUserByEmail, urlsForUser}
+module.exports = {generateRandomString, lookupUserByEmail, urlsForUser};

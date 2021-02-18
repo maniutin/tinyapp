@@ -1,16 +1,16 @@
-const {generateRandomString, lookupUserByEmail, urlsForUser} = require("./helpers")
+const {generateRandomString, lookupUserByEmail, urlsForUser} = require("./helpers");
 const express = require("express");
 const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 app.use(cookieSession({
   name: 'session',
   keys: ['7f69fa85-caec-4d9c-acd7-eebdccb368d5', 'f13b4d38-41c4-46d3-9ef6-8836d03cd8eb']
-}))
+}));
 
 
 //stores URLs
@@ -25,7 +25,7 @@ const users = {};
 //render register template
 app.get("/register", (req, res) => {
   if (req.session.user_id) {
-    res.redirect("/urls")
+    res.redirect("/urls");
     return;
   }
   res.render("register");
@@ -41,7 +41,7 @@ app.post("/register", (req, res) => {
     req.session.user_id = randomID;
     res.redirect('/urls/');
   } else {
-    res.sendStatus(400);
+    res.send("400 Bad Request: User already exists");
   }
   const userObj = {
     id: randomID,
@@ -54,7 +54,7 @@ app.post("/register", (req, res) => {
 //render login template
 app.get("/login", (req, res) => {
   if (req.session.user_id) {
-    res.redirect("/urls")
+    res.redirect("/urls");
     return;
   }
   res.render("login");
@@ -73,7 +73,7 @@ app.post("/login", (req, res) => {
       res.sendStatus(403);
       return;
     } else {
-      req.session.user_id = foundUserObj.id
+      req.session.user_id = foundUserObj.id;
       res.redirect("/urls/");
       return;
     }
@@ -129,7 +129,7 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL].userID === req.session.user_id) {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
-  } 
+  }
   res.redirect("/urls");
 });
 
@@ -143,7 +143,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //render update url template
 app.get("/urls/:shortURL", (req, res) => {
-  if(!urlDatabase[req.params.shortURL]){
+  if (!urlDatabase[req.params.shortURL]) {
     res.sendStatus(404);
   }
   const templateVars = { user: users[req.session.user_id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL};
