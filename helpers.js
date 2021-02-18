@@ -12,7 +12,7 @@ const generateRandomString = function() {
 //Looks up user object by email. Returns false if the email is NOT found
 const lookupUserByEmail = function(email, userDB) {
   if (email === "") {
-    return false;
+    return;
   } else {
     for (let user in userDB) {
       if (userDB[user].email === email) {

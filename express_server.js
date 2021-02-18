@@ -24,6 +24,10 @@ const users = {};
 
 //render register template
 app.get("/register", (req, res) => {
+  if (req.session.user_id) {
+    res.redirect("/urls")
+    return;
+  }
   res.render("register");
 });
 
@@ -31,9 +35,9 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const randomID = generateRandomString();
   const email = req.body.email;
-  const password  = req.body.password;
+  const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
-  if (lookupUserByEmail(email, users) === false) {
+  if (lookupUserByEmail(email, users) === false && password !== "") {
     req.session.user_id = randomID;
     res.redirect('/urls/');
   } else {
@@ -49,6 +53,10 @@ app.post("/register", (req, res) => {
 
 //render login template
 app.get("/login", (req, res) => {
+  if (req.session.user_id) {
+    res.redirect("/urls")
+    return;
+  }
   res.render("login");
 });
 
@@ -88,9 +96,6 @@ app.get("/", (req, res) => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
 
 //render /urls only if user is logged in
 app.get("/urls", (req, res) => {
@@ -124,7 +129,7 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL].userID === req.session.user_id) {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
-  }
+  } 
   res.redirect("/urls");
 });
 
@@ -138,12 +143,17 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 //render update url template
 app.get("/urls/:shortURL", (req, res) => {
+  if(!urlDatabase[req.params.shortURL]){
+    res.sendStatus(404);
+  }
   const templateVars = { user: users[req.session.user_id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL};
-  if (req.session.user_id) {
+  if (urlDatabase[req.params.shortURL].userID === req.session.user_id) {
     res.render("urls_show", templateVars);
     return;
+  } else {
+    res.sendStatus(403);
+    return;
   }
-  res.render("urls_index_not_logged_in", templateVars);
 });
 
 //render shortURL template
