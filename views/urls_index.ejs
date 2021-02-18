@@ -11,6 +11,7 @@
 <body>
   <%- include('partials/_header') %>
   <main style="margin: 1em;">
+    <% if(user){ %>
     <h3>My URLs</h3>
     <table class="table">
       <thead>
@@ -30,6 +31,9 @@
             <td><form method="POST" action="/urls/<%= url %>/delete"><button type="submit" class="btn btn-outline-danger">Delete</button></form></td>
           </tr>
         <% } %>
+        <% } else { %>
+          <p>Sorry, you need to <a href="/login">Login</a> or <a href="/register">Register</a> to view URLs.</p>
+          <% } %>
       </tbody>
     </table>
   </main>

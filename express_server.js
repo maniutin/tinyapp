@@ -8,6 +8,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 app.use(cookieParser());
 
+//Generates a random string to be used for shortURL or userID
 const generateRandomString = function() {
   let result = "";
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -18,7 +19,7 @@ const generateRandomString = function() {
   return result;
 };
 
-// return false if the email is NOT found
+//Looks up user object by email. Returns false if the email is NOT found
 const lookupUserByEmail = function(email, userDB) {
   if (email === "") {
     return false;
@@ -32,11 +33,18 @@ const lookupUserByEmail = function(email, userDB) {
   }
 };
 
+//Filters urlDatabase by userID
+const urlsForUser = function(id){
+  // id is req.cookies['user_ID'];
+  for(let urls in urlDatabase){
+    console.log(urlDatabase[urls])
+  }
+}
 const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "randomID"},
   "9sm5xK": { longURL: "http://www.google.com", userID: "randomID"}
 };
-
+urlsForUser();
 const users = {
   "randomID": {
     id: "randomID",
@@ -125,7 +133,7 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { user: users[req.cookies['user_ID']],shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL};
+  const templateVars = { user: users[req.cookies['user_ID']], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL};
   res.render("urls_show", templateVars);
 });
 app.get("/u/:shortURL", (req, res) => {
