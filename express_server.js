@@ -18,17 +18,19 @@ const generateRandomString = function() {
   return result;
 };
 
-const emailLookup = function (response, email, userDB){
-  if (email === ""){
-    response.sendStatus(400)
+const emailLookup = function(email, userDB) {
+  if (email === "") {
+    return false;
   } else {
-    for (let user in userDB){
+    for (let user in userDB) {
       if (userDB[user].email === email) {
-        response.sendStatus(400)
-      }
+         return userDB[user];
+      } 
     }
+    return false;
   }
-}
+};
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
@@ -40,32 +42,56 @@ const users = {
     email: "user@example.com",
     password: "whatever"
   }
-}
+};
 
 app.get("/register", (req, res) => {
   res.render("register");
 });
 app.post("/register", (req, res) => {
   const randomID = generateRandomString();
-  const email = req.body.email
-  const password  = req.body.password
-  if (emailLookup(res, email, users) !== 400){
-    res.cookie('user_ID', randomID)
+  const email = req.body.email;
+  const password  = req.body.password;
+  if (emailLookup(email, users) === false) {
+    res.cookie('user_ID', randomID);
     res.redirect('/urls/');
+  } else {
+    res.sendStatus(400)
   }
   const userObj = {
-    id: randomID, 
+    id: randomID,
     email,
     password
-  }
-  users[randomID] = userObj;  
+  };
+  users[randomID] = userObj;
 });
 app.get("/login", (req, res) => {
   res.render("login");
 });
-// app.post("/login", (req, res) => {
-//   res.redirect("/urls");
-// });
+app.post("/login", (req, res) => {
+  //if statement to lookup email and password
+  //if email not found -> 403
+  //if email found compare the password
+  //if the password doesnt match -> 403
+  //if email and password match -> set user_ID cookie with matching random ID
+  //redirect to URLs
+  const email = req.body.email;
+  const password  = req.body.password;
+  console.log("LOOKUP LOGIN: ", emailLookup(email, users))
+
+  if (emailLookup(email, users) === false){
+    res.sendStatus(403)
+    } else {
+      for (let user in users) {
+        if (users[user].password !== password) {
+          res.sendStatus(403)
+        } else {
+          res.cookie('user_ID');
+          res.redirect('/urls/');
+        }
+    }
+  }
+  res.redirect("/urls");
+});
 app.post("/logout", (req, res) => {
   res.clearCookie("user_ID");
   res.redirect("/urls");
