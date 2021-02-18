@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const PORT = 8080; //default port 8080
+const PORT = 8080; 
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 
@@ -19,7 +19,7 @@ const generateRandomString = function() {
 };
 
 // return false if the email is NOT found
-const emailLookup = function(email, userDB) {
+const lookupUserByEmail = function(email, userDB) {
   if (email === "") {
     return false;
   } else {
@@ -52,7 +52,7 @@ app.post("/register", (req, res) => {
   const randomID = generateRandomString();
   const email = req.body.email;
   const password  = req.body.password;
-  if (emailLookup(email, users) === false) {
+  if (lookupUserByEmail(email, users) === false) {
     res.cookie('user_ID', randomID);
     res.redirect('/urls/');
   } else {
@@ -72,10 +72,10 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password  = req.body.password;
 
-  if (emailLookup(email, users) === false){
+  if (lookupUserByEmail(email, users) === false){
     res.sendStatus(403)
     } else {
-      let foundUserObj = emailLookup(email, users);
+      let foundUserObj = lookupUserByEmail(email, users);
       if (foundUserObj.password !== password){
         res.sendStatus(403) 
       } else {
@@ -83,7 +83,7 @@ app.post("/login", (req, res) => {
         res.redirect('/urls/');
       }
     }
-    console.log("LOOKUP LOGIN: ", emailLookup(email, users))
+    console.log("LOOKUP LOGIN: ", lookupUserByEmail(email, users))
   
   res.redirect("/urls");
 });
@@ -111,6 +111,9 @@ app.post("/urls", (req, res) => {
 });
 app.get("/urls/new", (req, res) => {
   const templateVars = {user: users[req.cookies['user_ID']]};
+  if (templateVars.user === undefined){
+    res.redirect("/login")
+  }
   res.render("urls_new", templateVars);
 });
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -129,8 +132,6 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
-
-
 
 
 app.listen(PORT, () => {
