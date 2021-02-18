@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080; 
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-
+const bcrypt = require('bcrypt');
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 app.use(cookieParser());
@@ -49,11 +49,7 @@ const urlDatabase = {
 };
 
 const users = {
-  "randomID": {
-    id: "randomID",
-    email: "user@example.com",
-    password: "whatever"
-  }
+  
 };
 
 app.get("/register", (req, res) => {
@@ -63,6 +59,8 @@ app.post("/register", (req, res) => {
   const randomID = generateRandomString();
   const email = req.body.email;
   const password  = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10)
+  // console.log(hashedPassword);
   if (lookupUserByEmail(email, users) === false) {
     res.cookie('user_ID', randomID);
     res.redirect('/urls/');
@@ -72,7 +70,7 @@ app.post("/register", (req, res) => {
   const userObj = {
     id: randomID,
     email,
-    password
+    hashedPassword
   };
   users[randomID] = userObj;
 });
@@ -84,16 +82,19 @@ app.post("/login", (req, res) => {
   const password  = req.body.password;
   if (lookupUserByEmail(email, users) === false){
     res.sendStatus(403)
+    return;
     } else {
       let foundUserObj = lookupUserByEmail(email, users);
-      if (foundUserObj.password !== password){
+      if (!bcrypt.compareSync(password, foundUserObj.hashedPassword)){
         res.sendStatus(403) 
+        return;
       } else {
         res.cookie('user_ID', foundUserObj.id);
         res.redirect("/urls/");
+        return;
       }
     }  
-  res.redirect("/urls/");
+  // res.redirect("/urls/");
 });
 app.post("/logout", (req, res) => {
   res.clearCookie("user_ID");
@@ -112,6 +113,7 @@ app.get("/urls", (req, res) => {
   const templateVars = {user: users[req.cookies['user_ID']], urls: urlsForUser(req.cookies['user_ID'])};
   if (req.cookies['user_ID']){
   res.render("urls_index", templateVars);
+  return;
   } 
   res.render("urls_index_not_logged_in", templateVars);
   
@@ -125,6 +127,7 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {user: users[req.cookies['user_ID']]};
   if (templateVars.user === undefined){
     res.redirect("/login")
+    return;
   }
   res.render("urls_new", templateVars);
 });
