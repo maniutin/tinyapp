@@ -66,7 +66,7 @@ app.post("/register", (req, res) => {
   const password  = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
   if (lookupUserByEmail(email, users) === false) {
-    req.session.user_ID = randomID;
+    req.session.user_id = randomID;
     res.redirect('/urls/');
   } else {
     res.sendStatus(400);
@@ -108,7 +108,12 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const templateVars = {user: users[req.session.user_id], urls: urlsForUser(req.session.user_id)};
+  if (req.session.user_id) {
+    res.render("urls_index", templateVars);
+    return;
+  }
+  res.render("urls_index_not_logged_in", templateVars);
 });
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
